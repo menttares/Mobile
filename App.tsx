@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { WebView } from 'react-native-webview';
+
+import CategoriesScreen from './screens/CategoriesScreen'; // Подставьте правильный путь
+
 
 const categories = [
   { 
@@ -64,6 +68,14 @@ const categories = [
 const ProductDetailsScreen = ({ route }) => {
   const { title, description, price, products } = route.params.product;
 
+  useEffect(() => {
+    console.log('ProductDetailsScreen монтируется');
+    
+    return () => {
+      console.log('ProductDetailsScreen размонтируется');
+    };
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
@@ -84,6 +96,14 @@ const ProductDetailsScreen = ({ route }) => {
 };
 
 const WebViewScreen = () => {
+  useEffect(() => {
+    console.log('WebViewScreen монтируется');
+    
+    return () => {
+      console.log('WebViewScreen размонтируется');
+    };
+  }, []);
+
   const url = 'https://eda.yandex.ru/d/pizza?lang=ru&redirectFrom=root_eda.yandex.ru';
 
   return (
@@ -93,59 +113,52 @@ const WebViewScreen = () => {
   );
 };
 
+const HomeScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Главная</Text>
+    <Text style={styles.description}>Добро пожаловать!</Text>
+  </View>
+);
+
+const FavoriteScreen = () => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Избранное</Text>
+    <Text style={styles.description}>Ваши избранные товары здесь</Text>
+  </View>
+);
+
+const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+
+const CategoriesStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="Categories"
+      component={CategoriesScreen}
+      options={{ title: 'Доступные категории' }}
+    />
+    <Stack.Screen
+      name="ProductDetails"
+      component={ProductDetailsScreen}
+      options={{ title: 'Подробности продукта' }}
+    />
+    <Stack.Screen
+      name="WebView"
+      component={WebViewScreen}
+      options={{ title: 'Веб-просмотр' }}
+    />
+  </Stack.Navigator>
+);
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Categories"
-          component={CategoriesScreen}
-          options={{ title: 'Доступные категории' }}
-        />
-        <Stack.Screen
-          name="ProductDetails"
-          component={ProductDetailsScreen}
-          options={{ title: 'Подробности продукта' }}
-        />
-        <Stack.Screen
-          name="WebView"
-          component={WebViewScreen}
-          options={{ title: 'Веб-просмотр' }}
-        />
-      </Stack.Navigator>
+      <Tab.Navigator>
+        <Tab.Screen name="Главная" component={HomeScreen} />
+        <Tab.Screen name="Категории" component={CategoriesStack} />
+        <Tab.Screen name="Избранное" component={FavoriteScreen} />
+      </Tab.Navigator>
     </NavigationContainer>
-  );
-};
-
-const CategoriesScreen = ({ navigation }) => {
-  const [expandedCategories, setExpandedCategories] = useState([]);
-
-  const handlePress = (product) => {
-    navigation.navigate('ProductDetails', { product });
-  };
-
-  const handleWebButtonPress = () => {
-    navigation.navigate('WebView');
-  };
-
-  return (
-    <View style={styles.container}>
-      {categories.map((category) => (
-        <TouchableOpacity
-          key={category.id}
-          onPress={() => handlePress(category)}
-          style={styles.productContainer}
-        >
-          <Text style={styles.productTitle}>{category.title}</Text>
-        </TouchableOpacity>
-      ))}
-      <Button
-        title="Открыть Google"
-        onPress={handleWebButtonPress}
-      />
-    </View>
   );
 };
 
